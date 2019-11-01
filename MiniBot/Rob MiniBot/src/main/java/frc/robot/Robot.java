@@ -33,7 +33,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.Faults;
-import com.ctre.phoenix.motorcontrol.InvertType;
+//import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Joystick;
@@ -44,10 +44,10 @@ public class Robot extends TimedRobot {
     /*
      * --- [1] Update CAN Device IDs and use WPI_VictorSPX where necessary ------
      */
-    WPI_TalonSRX _rghtFront = new WPI_TalonSRX(20);
     
     WPI_TalonSRX _leftFront = new WPI_TalonSRX(10);
-    
+    WPI_TalonSRX _rghtFront = new WPI_TalonSRX(20);
+
 
     DifferentialDrive _diffDrive = new DifferentialDrive(_leftFront, _rghtFront);
 
@@ -55,7 +55,7 @@ public class Robot extends TimedRobot {
 
     Faults _faults_L = new Faults();
     Faults _faults_R = new Faults();
-
+   
     @Override
     public void teleopPeriodic() {
 
@@ -64,6 +64,10 @@ public class Robot extends TimedRobot {
         /* get gamepad stick values */
         double forw = -1 * _joystick.getRawAxis(1); /* positive is forward */
         double turn = +1 * _joystick.getRawAxis(2); /* positive is right */
+
+        forw = forw/2;  //  limit motor to half voltage so we don't break too much
+        turn = turn/2;
+
         boolean btn1 = _joystick.getRawButton(1); /* is button is down, print joystick values */
 
         /* deadband gamepad 10% */
@@ -118,14 +122,14 @@ public class Robot extends TimedRobot {
        
        
         /* [3] flip values so robot moves forward when stick-forward/LEDs-green */
-        _rghtFront.setInverted(true); // !< Update this
-        _leftFront.setInverted(false); // !< Update this
+        _rghtFront.setInverted(false); // !< Update this
+        _leftFront.setInverted(true); // !< Update this
 
               /*
          * [4] adjust sensor phase so sensor moves positive when Talon LEDs are green
          */
-        _rghtFront.setSensorPhase(true);
-        _leftFront.setSensorPhase(true);
+        _rghtFront.setSensorPhase(false);
+        _leftFront.setSensorPhase(false);
 
         /*
          * WPI drivetrain classes defaultly assume left and right are opposite. call
