@@ -1,0 +1,9 @@
+[
+  {
+    "artifact": "frcJava (in project Rob MiniBot)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "Rob MiniBot",
+    "language": "java"
+  }
+]

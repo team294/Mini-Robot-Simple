@@ -1,0 +1,9 @@
+[
+  {
+    "artifact": "frcJava (in project DifferentialDrive)",
+    "target": "roborio",
+    "debugfile": "frcJava_roborio.debugconfig",
+    "project": "DifferentialDrive",
+    "language": "java"
+  }
+]

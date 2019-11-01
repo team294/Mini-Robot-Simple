@@ -1,0 +1,57 @@
+<xml version="1.0">
+<dashboard>
+	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.RobotPreferences">
+		<location x="12" y="8"/>
+	</static-widget>
+	<widget field="Auto Selector" type="String" class="edu.wpi.first.smartdashboard.gui.elements.TextBox">
+		<location x="490" y="20"/>
+	</widget>
+</dashboard>
+<live-window>
+	<widget field="Ungrouped" type="LW Subsystem" class="edu.wpi.first.smartdashboard.livewindow.elements.LWSubsystem">
+		<widget field="Talon SRX [4]" type="Speed Controller" class="edu.wpi.first.smartdashboard.livewindow.elements.SpeedController">
+			<location x="6" y="16"/>
+			<height>45</height>
+			<width>297</width>
+		</widget>
+		<widget field="Victor SPX [7]" type="Speed Controller" class="edu.wpi.first.smartdashboard.livewindow.elements.SpeedController">
+			<location x="6" y="61"/>
+			<height>45</height>
+			<width>297</width>
+		</widget>
+		<widget field="Talon SRX [5]" type="Speed Controller" class="edu.wpi.first.smartdashboard.livewindow.elements.SpeedController">
+			<location x="6" y="106"/>
+			<height>45</height>
+			<width>297</width>
+		</widget>
+		<widget field="Victor SPX [17]" type="Speed Controller" class="edu.wpi.first.smartdashboard.livewindow.elements.SpeedController">
+			<location x="6" y="151"/>
+			<height>45</height>
+			<width>297</width>
+		</widget>
+		<widget field="Talon SRX [20]" type="Speed Controller" class="edu.wpi.first.smartdashboard.livewindow.elements.SpeedController">
+			<location x="6" y="196"/>
+			<height>45</height>
+			<width>297</width>
+		</widget>
+		<widget field="Talon SRX [10]" type="Speed Controller" class="edu.wpi.first.smartdashboard.livewindow.elements.SpeedController">
+			<location x="6" y="241"/>
+			<height>45</height>
+			<width>297</width>
+		</widget>
+		<widget field="Talon SRX [21]" type="Speed Controller" class="edu.wpi.first.smartdashboard.livewindow.elements.SpeedController">
+			<location x="6" y="286"/>
+			<height>45</height>
+			<width>297</width>
+		</widget>
+		<widget field="Talon SRX [11]" type="Speed Controller" class="edu.wpi.first.smartdashboard.livewindow.elements.SpeedController">
+			<location x="6" y="331"/>
+			<height>45</height>
+			<width>297</width>
+		</widget>
+		<location x="26" y="17"/>
+		<width>309</width>
+		<height>382</height>
+	</widget>
+</live-window>
+</xml>
