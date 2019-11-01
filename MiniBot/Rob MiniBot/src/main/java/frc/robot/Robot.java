@@ -57,64 +57,6 @@ public class Robot extends TimedRobot {
     Faults _faults_R = new Faults();
    
     @Override
-    public void teleopPeriodic() {
-
-        String work = "";
-
-        /* get gamepad stick values */
-        double forw = -1 * _joystick.getRawAxis(1); /* positive is forward */
-        double turn = +1 * _joystick.getRawAxis(2); /* positive is right */
-
-        forw = forw/2;  //  limit motor to half voltage so we don't break too much
-        turn = turn/2;
-
-        boolean btn1 = _joystick.getRawButton(1); /* is button is down, print joystick values */
-
-        /* deadband gamepad 10% */
-        if (Math.abs(forw) < 0.10) {
-            forw = 0;
-        }
-        if (Math.abs(turn) < 0.10) {
-            turn = 0;
-        }
-
-        /* drive robot */
-        _diffDrive.arcadeDrive(forw, turn);
-
-        /*
-         * [2] Make sure Gamepad Forward is positive for FORWARD, and GZ is positive for
-         * RIGHT
-         */
-        work += " GF:" + forw + " GT:" + turn;
-
-        /* get sensor values */
-        // double leftPos = _leftFront.GetSelectedSensorPosition(0);
-        // double rghtPos = _rghtFront.GetSelectedSensorPosition(0);
-        double leftVelUnitsPer100ms = _leftFront.getSelectedSensorVelocity(0);
-        double rghtVelUnitsPer100ms = _rghtFront.getSelectedSensorVelocity(0);
-
-        work += " L:" + leftVelUnitsPer100ms + " R:" + rghtVelUnitsPer100ms;
-
-        /*
-         * drive motor at least 25%, Talons will auto-detect if sensor is out of phase
-         */
-        _leftFront.getFaults(_faults_L);
-        _rghtFront.getFaults(_faults_R);
-
-        if (_faults_L.SensorOutOfPhase) {
-            work += " L sensor is out of phase";
-        }
-        if (_faults_R.SensorOutOfPhase) {
-            work += " R sensor is out of phase";
-        }
-
-        /* print to console if btn1 is held down */
-        if (btn1) {
-            System.out.println(work);
-        }
-    }
-
-    @Override
     public void robotInit() {
         /* factory default values */
         _rghtFront.configFactoryDefault();
@@ -137,4 +79,69 @@ public class Robot extends TimedRobot {
          */
         _diffDrive.setRightSideInverted(false);
     }
+
+    @Override
+    public void teleopInit() {
+     /*  start both encoders at zero when teleop initializes */
+     _rghtFront.setSelectedSensorPosition(0);
+     _leftFront.setSelectedSensorPosition(0);
+     
+    }
+    @Override
+    public void teleopPeriodic() {
+
+        String work = "";
+
+        /* get gamepad stick values */
+        double forw = -1 * _joystick.getRawAxis(1); /* positive is forward */
+        double turn = +1 * _joystick.getRawAxis(2); /* positive is right */
+
+        forw = forw/2;  //  limit motor to half voltage so we don't break too much
+        turn = turn/2;  //  limit motor to half voltage so we don't break too much
+
+        boolean btn1 = _joystick.getRawButton(1); /* is button is down, print joystick values */
+
+        /* deadband gamepad 10% */
+        if (Math.abs(forw) < 0.10) {
+            forw = 0;
+        }
+        if (Math.abs(turn) < 0.10) {
+            turn = 0;
+        }
+
+        /* drive robot */
+        _diffDrive.arcadeDrive(forw, turn);
+
+        /*
+         * [2] Make sure Gamepad Forward is positive for FORWARD, and GZ is positive for
+         * RIGHT
+         */
+        work += " GF:" + forw + " GT:" + turn;
+
+        /* get sensor values */
+        double leftPos = _leftFront.getSelectedSensorPosition();
+        double rghtPos = _rghtFront.getSelectedSensorPosition();
+        double leftVelUnitsPer100ms = _leftFront.getSelectedSensorVelocity(0);
+        double rghtVelUnitsPer100ms = _rghtFront.getSelectedSensorVelocity(0);
+
+        work += " LP:"+leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+rghtPos + " RV:" + rghtVelUnitsPer100ms;
+
+        /*
+         * drive motor at least 25%, Talons will auto-detect if sensor is out of phase
+         */
+        _leftFront.getFaults(_faults_L);
+        _rghtFront.getFaults(_faults_R);
+
+        if (_faults_L.SensorOutOfPhase) {
+            work += " L sensor is out of phase";
+        }
+        if (_faults_R.SensorOutOfPhase) {
+            work += " R sensor is out of phase";
+        }
+
+        /* print to console if btn1 is held down */
+        if (btn1) {
+            System.out.println(work);
+        }
+    }  
 }
