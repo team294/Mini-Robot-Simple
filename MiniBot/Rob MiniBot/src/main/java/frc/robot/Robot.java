@@ -94,7 +94,7 @@ public class Robot extends TimedRobot {
 
         /* get gamepad stick values */
         double forw = -1 * _joystick.getRawAxis(1); /* positive is forward */
-        double turn = +1 * _joystick.getRawAxis(2); /* positive is right */
+        double turn = -1 * _joystick.getRawAxis(2); /* positive is right */
 
         forw = forw/2;  //  limit motor to half voltage so we don't break too much
         turn = turn/2;  //  limit motor to half voltage so we don't break too much
