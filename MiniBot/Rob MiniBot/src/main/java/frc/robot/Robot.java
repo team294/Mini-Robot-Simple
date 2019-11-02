@@ -56,10 +56,10 @@ public class Robot extends TimedRobot {
     Faults _faults_L = new Faults();
     Faults _faults_R = new Faults();
 
-    float pi= 355/113;
-    float leftPos, rghtPos;
-    float  diam = (float) 4.5;
-    double forw, turn ;
+    double pi= 355/113;
+    double leftPos, rghtPos;
+    double  diam =  4.5;
+    double leftPct, rghtPct ;
    
     @Override
     public void robotInit() {
@@ -109,30 +109,31 @@ public class Robot extends TimedRobot {
         String work = "";
 
         /* get gamepad stick values */
-        forw = -1 * _joystick.getRawAxis(1); /* positive is forward */
-        turn = -1 * _joystick.getRawAxis(2); /* positive is right */
+        leftPct = -1 * _joystick.getRawAxis(1); /* positive is forward */
+        rghtPct = -1 * _joystick.getRawAxis(3); /* positive is right */
 
-        forw = forw/2;  //  limit motor to half voltage so we don't break too much
-        turn = turn/2;  //  limit motor to half voltage so we don't break too much
+        leftPct = leftPct * 0.5;  //  limit motor voltage so we don't break too much
+        rghtPct = rghtPct * 0.5;  //  limit motor voltage so we don't break too much
 
-        boolean btn1 = _joystick.getRawButton(1); /* is button is down, print joystick values */
+        boolean btn1 = _joystick.getRawButton(13); /* is button is down, print joystick values */
+        boolean btn2 = _joystick.getRawButton(15); /* is button is down, print joystick values */
 
         /* deadband gamepad 10% */
-        if (Math.abs(forw) < 0.10) {
-            forw = 0;
+        if (Math.abs(leftPct) < 0.10) {
+            leftPct = 0;
         }
-        if (Math.abs(turn) < 0.10) {
-            turn = 0;
+        if (Math.abs(rghtPct) < 0.10) {
+            rghtPct = 0;
         }
 
         /* drive robot */
-        _diffDrive.arcadeDrive(forw, turn);
+        _diffDrive.tankDrive(leftPct, rghtPct);
 
         /*
          * [2] Make sure Gamepad Forward is positive for FORWARD, and GZ is positive for
          * RIGHT
          */
-        work += " GF:" + forw + " GT:" + turn;
+        work += " GF:" + leftPct + " GT:" + rghtPct;
 
         /* get sensor values */
         readPosition();
@@ -160,7 +161,7 @@ public class Robot extends TimedRobot {
         }
 
         /* print to console if btn1 is held down */
-        if (btn1) {
+        if (btn1 || btn2) {
             System.out.println(work);
         }
     }
@@ -170,14 +171,14 @@ public class Robot extends TimedRobot {
           /* drive robot */
         readPosition();
         if ((leftPos+rghtPos)/2 < 48) {   // stop at 48 inches
-            forw = 0.35;
-            turn = 0.0;
+            leftPct = 0.35;
+            rghtPct = 0.35;
         }
         else {
-            forw = 0;
-            turn = 0;
+            leftPct = 0;
+            rghtPct = 0;
         }
-        _diffDrive.arcadeDrive(forw, turn);
+        _diffDrive.arcadeDrive(leftPct, rghtPct);
 
     }
 
