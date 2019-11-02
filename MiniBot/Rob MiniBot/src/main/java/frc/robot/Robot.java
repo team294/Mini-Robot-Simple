@@ -55,6 +55,11 @@ public class Robot extends TimedRobot {
 
     Faults _faults_L = new Faults();
     Faults _faults_R = new Faults();
+
+    float pi= 355/113;
+    float leftPos, rghtPos;
+    float  diam = (float) 4.5;
+    double forw, turn ;
    
     @Override
     public void robotInit() {
@@ -78,6 +83,7 @@ public class Robot extends TimedRobot {
          * this so we can apply + to both sides when moving forward. DO NOT CHANGE
          */
         _diffDrive.setRightSideInverted(false);
+        
     }
 
     @Override
@@ -85,6 +91,16 @@ public class Robot extends TimedRobot {
      /*  start both encoders at zero when teleop initializes */
      _rghtFront.setSelectedSensorPosition(0);
      _leftFront.setSelectedSensorPosition(0);
+     System.out.println("TELEOP STARTED");   
+    }
+
+
+    @Override
+    public void autonomousInit() {
+     /*  start both encoders at zero when autonomous initializes */
+     _rghtFront.setSelectedSensorPosition(0);
+     _leftFront.setSelectedSensorPosition(0);
+     System.out.println("AUTO STARTED");
      
     }
     @Override
@@ -93,8 +109,8 @@ public class Robot extends TimedRobot {
         String work = "";
 
         /* get gamepad stick values */
-        double forw = -1 * _joystick.getRawAxis(1); /* positive is forward */
-        double turn = +1 * _joystick.getRawAxis(2); /* positive is right */
+        forw = -1 * _joystick.getRawAxis(1); /* positive is forward */
+        turn = -1 * _joystick.getRawAxis(2); /* positive is right */
 
         forw = forw/2;  //  limit motor to half voltage so we don't break too much
         turn = turn/2;  //  limit motor to half voltage so we don't break too much
@@ -119,12 +135,16 @@ public class Robot extends TimedRobot {
         work += " GF:" + forw + " GT:" + turn;
 
         /* get sensor values */
-        double leftPos = _leftFront.getSelectedSensorPosition();
-        double rghtPos = _rghtFront.getSelectedSensorPosition();
+        readPosition();
+        //leftPos = _leftFront.getSelectedSensorPosition();
+       // rghtPos = _rghtFront.getSelectedSensorPosition();
         double leftVelUnitsPer100ms = _leftFront.getSelectedSensorVelocity(0);
         double rghtVelUnitsPer100ms = _rghtFront.getSelectedSensorVelocity(0);
 
-        work += " LP:"+leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+rghtPos + " RV:" + rghtVelUnitsPer100ms;
+       // leftPos = (leftPos/4096)*pi*diameter;  // Calculate distance in inches
+       // rghtPos = (rghtPos/4096)*pi*diameter;
+   
+        work += " LP:"+(int)leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+(int)rghtPos + " RV:" + rghtVelUnitsPer100ms;
 
         /*
          * drive motor at least 25%, Talons will auto-detect if sensor is out of phase
@@ -143,5 +163,30 @@ public class Robot extends TimedRobot {
         if (btn1) {
             System.out.println(work);
         }
-    }  
+    }
+    
+    @Override
+    public void autonomousPeriodic() {   
+          /* drive robot */
+        readPosition();
+        if ((leftPos+rghtPos)/2 < 48) {   // stop at 48 inches
+            forw = 0.35;
+            turn = 0.0;
+        }
+        else {
+            forw = 0;
+            turn = 0;
+        }
+        _diffDrive.arcadeDrive(forw, turn);
+
+    }
+
+    public void readPosition() {
+        leftPos = _leftFront.getSelectedSensorPosition();
+        rghtPos = _rghtFront.getSelectedSensorPosition();
+       
+        leftPos = (leftPos/4096)*pi*diam;  // Calculate distance in inches
+        rghtPos = (rghtPos/4096)*pi*diam;
+
+    }
 }
