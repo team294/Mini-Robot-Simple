@@ -112,8 +112,8 @@ public class Robot extends TimedRobot {
         leftPct = -1 * _joystick.getRawAxis(1); /* positive is forward */
         rghtPct = -1 * _joystick.getRawAxis(3); /* positive is right */
 
-        leftPct = leftPct * 0.5;  //  limit motor voltage so we don't break too much
-        rghtPct = rghtPct * 0.5;  //  limit motor voltage so we don't break too much
+        leftPct = leftPct * 0.45;  //  limit motor voltage so we don't break too much
+        rghtPct = rghtPct * 0.45;  //  limit motor voltage so we don't break too much
 
         boolean btn1 = _joystick.getRawButton(13); /* is button is down, print joystick values */
         boolean btn2 = _joystick.getRawButton(15); /* is button is down, print joystick values */
@@ -171,14 +171,14 @@ public class Robot extends TimedRobot {
           /* drive robot */
         readPosition();
         if ((leftPos+rghtPos)/2 < 48) {   // stop at 48 inches
-            leftPct = 0.35;
-            rghtPct = 0.35;
+            leftPct = 0.4;
+            rghtPct = 0.4;
         }
         else {
             leftPct = 0;
             rghtPct = 0;
         }
-        _diffDrive.arcadeDrive(leftPct, rghtPct);
+        _diffDrive.tankDrive(leftPct, rghtPct);
 
     }
 
