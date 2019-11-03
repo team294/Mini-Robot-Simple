@@ -130,8 +130,7 @@ public class Robot extends TimedRobot {
         _diffDrive.tankDrive(leftPct, rghtPct);
 
         /*
-         * [2] Make sure Gamepad Forward is positive for FORWARD, and GZ is positive for
-         * RIGHT
+         * [2] Make sure Gamepad Forward is positive for FORWARD
          */
         work += " GF:" + leftPct + " GT:" + rghtPct;
 
