@@ -33,7 +33,6 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.Faults;
-//import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Joystick;
@@ -56,7 +55,7 @@ public class Robot extends TimedRobot {
     Faults _faults_L = new Faults();
     Faults _faults_R = new Faults();
 
-    double pi= 355/113;
+    double pi = Math.PI;
     double leftPos, rghtPos;
     double  diam =  4.5;
     double leftPct, rghtPct ;
