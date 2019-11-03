@@ -55,6 +55,11 @@ public class Robot extends TimedRobot {
 
     Faults _faults_L = new Faults();
     Faults _faults_R = new Faults();
+
+    double pi= 355/113;
+    double leftPos, rghtPos;
+    double  diam =  4.5;
+    double leftPct, rghtPct ;
    
     @Override
     public void robotInit() {
@@ -78,6 +83,7 @@ public class Robot extends TimedRobot {
          * this so we can apply + to both sides when moving forward. DO NOT CHANGE
          */
         _diffDrive.setRightSideInverted(false);
+        
     }
 
     @Override
@@ -85,6 +91,16 @@ public class Robot extends TimedRobot {
      /*  start both encoders at zero when teleop initializes */
      _rghtFront.setSelectedSensorPosition(0);
      _leftFront.setSelectedSensorPosition(0);
+     System.out.println("TELEOP STARTED");   
+    }
+
+
+    @Override
+    public void autonomousInit() {
+     /*  start both encoders at zero when autonomous initializes */
+     _rghtFront.setSelectedSensorPosition(0);
+     _leftFront.setSelectedSensorPosition(0);
+     System.out.println("AUTO STARTED");
      
     }
     @Override
@@ -93,38 +109,42 @@ public class Robot extends TimedRobot {
         String work = "";
 
         /* get gamepad stick values */
-        double forw = -1 * _joystick.getRawAxis(1); /* positive is forward */
-        double turn = -1 * _joystick.getRawAxis(2); /* positive is right */
+        leftPct = -1 * _joystick.getRawAxis(1); /* positive is forward */
+        rghtPct = -1 * _joystick.getRawAxis(3); /* positive is right */
 
-        forw = forw/2;  //  limit motor to half voltage so we don't break too much
-        turn = turn/2;  //  limit motor to half voltage so we don't break too much
+        leftPct = leftPct * 0.45;  //  limit motor voltage so we don't break too much
+        rghtPct = rghtPct * 0.45;  //  limit motor voltage so we don't break too much
 
-        boolean btn1 = _joystick.getRawButton(1); /* is button is down, print joystick values */
+        boolean btn1 = _joystick.getRawButton(13); /* is button is down, print joystick values */
+        boolean btn2 = _joystick.getRawButton(15); /* is button is down, print joystick values */
 
         /* deadband gamepad 10% */
-        if (Math.abs(forw) < 0.10) {
-            forw = 0;
+        if (Math.abs(leftPct) < 0.10) {
+            leftPct = 0;
         }
-        if (Math.abs(turn) < 0.10) {
-            turn = 0;
+        if (Math.abs(rghtPct) < 0.10) {
+            rghtPct = 0;
         }
 
         /* drive robot */
-        _diffDrive.arcadeDrive(forw, turn);
+        _diffDrive.tankDrive(leftPct, rghtPct);
 
         /*
-         * [2] Make sure Gamepad Forward is positive for FORWARD, and GZ is positive for
-         * RIGHT
+         * [2] Make sure Gamepad Forward is positive for FORWARD
          */
-        work += " GF:" + forw + " GT:" + turn;
+        work += " GF:" + leftPct + " GT:" + rghtPct;
 
         /* get sensor values */
-        double leftPos = _leftFront.getSelectedSensorPosition();
-        double rghtPos = _rghtFront.getSelectedSensorPosition();
+        readPosition();
+        //leftPos = _leftFront.getSelectedSensorPosition();
+       // rghtPos = _rghtFront.getSelectedSensorPosition();
         double leftVelUnitsPer100ms = _leftFront.getSelectedSensorVelocity(0);
         double rghtVelUnitsPer100ms = _rghtFront.getSelectedSensorVelocity(0);
 
-        work += " LP:"+leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+rghtPos + " RV:" + rghtVelUnitsPer100ms;
+       // leftPos = (leftPos/4096)*pi*diameter;  // Calculate distance in inches
+       // rghtPos = (rghtPos/4096)*pi*diameter;
+   
+        work += " LP:"+(int)leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+(int)rghtPos + " RV:" + rghtVelUnitsPer100ms;
 
         /*
          * drive motor at least 25%, Talons will auto-detect if sensor is out of phase
@@ -140,8 +160,33 @@ public class Robot extends TimedRobot {
         }
 
         /* print to console if btn1 is held down */
-        if (btn1) {
+        if (btn1 || btn2) {
             System.out.println(work);
         }
-    }  
+    }
+    
+    @Override
+    public void autonomousPeriodic() {   
+          /* drive robot */
+        readPosition();
+        if ((leftPos+rghtPos)/2 < 48) {   // stop at 48 inches
+            leftPct = 0.4;
+            rghtPct = 0.4;
+        }
+        else {
+            leftPct = 0;
+            rghtPct = 0;
+        }
+        _diffDrive.tankDrive(leftPct, rghtPct);
+
+    }
+
+    public void readPosition() {
+        leftPos = _leftFront.getSelectedSensorPosition();
+        rghtPos = _rghtFront.getSelectedSensorPosition();
+       
+        leftPos = (leftPos/4096)*pi*diam;  // Calculate distance in inches
+        rghtPos = (rghtPos/4096)*pi*diam;
+
+    }
 }
