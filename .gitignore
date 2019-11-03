@@ -1,7 +1,7 @@
 *.class
 *.jar
-*.bib
-',lock
+*.bin
+*.lock
 
 
 # Windows thumbnail cache files
