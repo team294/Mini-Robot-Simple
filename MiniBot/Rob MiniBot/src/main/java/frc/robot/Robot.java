@@ -22,14 +22,7 @@
  * (INCLUDING NEGLIGENCE), BREACH OF WARRANTY, OR OTHERWISE
  */
 
-/**
- * Enable robot and slowly drive forward.
- * [1] If DS reports errors, adjust CAN IDs and firmware update.
- * [2] If motors are spinning incorrectly, first check gamepad (hold down btn1)
- * [3] If motors are still spinning incorrectly, correct motor inverts.
- * [4] Now that motors are driving correctly, check sensor phase.  If sensor is out of phase, adjust sensor phase.
- * [4] Is only necessary if you have sensors.
- */
+
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.Faults;
