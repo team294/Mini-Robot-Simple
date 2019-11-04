@@ -51,7 +51,8 @@ public class Robot extends TimedRobot {
     double pi = Math.PI;
     double leftPos, rghtPos;
     double  diam =  4.5;
-    double leftPct, rghtPct ;
+    double leftPct, rghtPct, maxVel=2 ;  // maxVel in ft/sec??
+    boolean velMode;
    
     @Override
     public void robotInit() {
@@ -100,30 +101,51 @@ public class Robot extends TimedRobot {
 
         String log = "";
 
-        /* get gamepad stick values */
+        /* get gamepad stick values          
+         *  Make sure Gamepad Forward is positive for FORWARD
+         */
         leftPct = -1 * _joystick.getRawAxis(1); /* positive is forward */
         rghtPct = -1 * _joystick.getRawAxis(5); /* positive is right */
 
-        leftPct = leftPct * 0.45;  //  limit motor voltage so we don't break too much
-        rghtPct = rghtPct * 0.45;  //  limit motor voltage so we don't break too much
+        boolean btn1 = _joystick.getRawButton(5); /* if button is down, print log values */
+        boolean btn2 = _joystick.getRawButton(6); /* if button is down, print log values */
+        boolean btnA = _joystick.getRawButton(1);
+        boolean btnB = _joystick.getRawButton(2);
 
-        boolean btn1 = _joystick.getRawButton(5); /* if button is down, print joystick values */
-        boolean btn2 = _joystick.getRawButton(6); /* if button is down, print joystick values */
-
-        /* deadband gamepad 10% */
-        if (Math.abs(leftPct) < 0.10) {
-            leftPct = 0;
+        if (btnA) {
+            velMode = false;
+            System.out.println("Switched to Percent Drive");
+        
+           
         }
-        if (Math.abs(rghtPct) < 0.10) {
-            rghtPct = 0;
+
+        if (btnB) {
+            velMode = true;
+            System.out.println("Switched to Velocity Drive"); 
         }
 
         /* drive robot */
-        _diffDrive.tankDrive(leftPct, rghtPct);
+        if ( ! velMode) {
+             /* deadband gamepad 10% */
+             if (Math.abs(leftPct) < 0.10) {
+                leftPct = 0;
+            }
+        
+            if (Math.abs(rghtPct) < 0.10) {
+                rghtPct = 0;
+            }
+            leftPct = leftPct * 0.45;  //  limit motor voltage so we don't break too much
+            rghtPct = rghtPct * 0.45;  //  limit motor voltage so we don't break too much
 
-        /*
-         * [2] Make sure Gamepad Forward is positive for FORWARD
-         */
+            _diffDrive.tankDrive(leftPct, rghtPct);
+        }   
+        /* else drive with velocity PID */
+        else {          // TODO ADD PID LOOP
+             _diffDrive.tankDrive(0.2, 0.2);  
+            leftPct *= maxVel;
+            rghtPct *= maxVel;
+        }  
+       
         log += " GL:" + leftPct + " GR:" + rghtPct;
 
         /* get sensor values */
@@ -133,8 +155,7 @@ public class Robot extends TimedRobot {
         double leftVelUnitsPer100ms = _leftFront.getSelectedSensorVelocity(0);
         double rghtVelUnitsPer100ms = _rghtFront.getSelectedSensorVelocity(0);
 
-       // leftPos = (leftPos/4096)*pi*diameter;  // Calculate distance in inches
-       // rghtPos = (rghtPos/4096)*pi*diameter;
+       
    
         log += " LP:"+(int)leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+(int)rghtPos + " RV:" + rghtVelUnitsPer100ms;
 
