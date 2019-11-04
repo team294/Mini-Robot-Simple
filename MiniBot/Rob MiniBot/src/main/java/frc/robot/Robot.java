@@ -109,13 +109,13 @@ public class Robot extends TimedRobot {
 
         /* get gamepad stick values */
         leftPct = -1 * _joystick.getRawAxis(1); /* positive is forward */
-        rghtPct = -1 * _joystick.getRawAxis(3); /* positive is right */
+        rghtPct = -1 * _joystick.getRawAxis(5); /* positive is right */
 
         leftPct = leftPct * 0.45;  //  limit motor voltage so we don't break too much
         rghtPct = rghtPct * 0.45;  //  limit motor voltage so we don't break too much
 
-        boolean btn1 = _joystick.getRawButton(13); /* is button is down, print joystick values */
-        boolean btn2 = _joystick.getRawButton(15); /* is button is down, print joystick values */
+        boolean btn1 = _joystick.getRawButton(5); /* is button is down, print joystick values */
+        boolean btn2 = _joystick.getRawButton(6); /* is button is down, print joystick values */
 
         /* deadband gamepad 10% */
         if (Math.abs(leftPct) < 0.10) {
