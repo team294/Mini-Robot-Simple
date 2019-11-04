@@ -88,24 +88,24 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
      /*  start both encoders at zero when teleop initializes */
-     _rghtFront.setSelectedSensorPosition(0);
-     _leftFront.setSelectedSensorPosition(0);
-     System.out.println("TELEOP STARTED");   
+        _rghtFront.setSelectedSensorPosition(0);
+        _leftFront.setSelectedSensorPosition(0);
+        System.out.println("TELEOP STARTED");   
     }
 
 
     @Override
     public void autonomousInit() {
      /*  start both encoders at zero when autonomous initializes */
-     _rghtFront.setSelectedSensorPosition(0);
-     _leftFront.setSelectedSensorPosition(0);
-     System.out.println("AUTO STARTED");
+        _rghtFront.setSelectedSensorPosition(0);
+        _leftFront.setSelectedSensorPosition(0);
+        System.out.println("AUTO STARTED");
      
     }
     @Override
     public void teleopPeriodic() {
 
-        String work = "";
+        String log = "";
 
         /* get gamepad stick values */
         leftPct = -1 * _joystick.getRawAxis(1); /* positive is forward */
@@ -114,8 +114,8 @@ public class Robot extends TimedRobot {
         leftPct = leftPct * 0.45;  //  limit motor voltage so we don't break too much
         rghtPct = rghtPct * 0.45;  //  limit motor voltage so we don't break too much
 
-        boolean btn1 = _joystick.getRawButton(5); /* is button is down, print joystick values */
-        boolean btn2 = _joystick.getRawButton(6); /* is button is down, print joystick values */
+        boolean btn1 = _joystick.getRawButton(5); /* if button is down, print joystick values */
+        boolean btn2 = _joystick.getRawButton(6); /* if button is down, print joystick values */
 
         /* deadband gamepad 10% */
         if (Math.abs(leftPct) < 0.10) {
@@ -131,7 +131,7 @@ public class Robot extends TimedRobot {
         /*
          * [2] Make sure Gamepad Forward is positive for FORWARD
          */
-        work += " GF:" + leftPct + " GT:" + rghtPct;
+        log += " GL:" + leftPct + " GR:" + rghtPct;
 
         /* get sensor values */
         readPosition();
@@ -143,7 +143,7 @@ public class Robot extends TimedRobot {
        // leftPos = (leftPos/4096)*pi*diameter;  // Calculate distance in inches
        // rghtPos = (rghtPos/4096)*pi*diameter;
    
-        work += " LP:"+(int)leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+(int)rghtPos + " RV:" + rghtVelUnitsPer100ms;
+        log += " LP:"+(int)leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+(int)rghtPos + " RV:" + rghtVelUnitsPer100ms;
 
         /*
          * drive motor at least 25%, Talons will auto-detect if sensor is out of phase
@@ -152,15 +152,15 @@ public class Robot extends TimedRobot {
         _rghtFront.getFaults(_faults_R);
 
         if (_faults_L.SensorOutOfPhase) {
-            work += " L sensor is out of phase";
+            log += " L sensor is out of phase";
         }
         if (_faults_R.SensorOutOfPhase) {
-            work += " R sensor is out of phase";
+            log += " R sensor is out of phase";
         }
 
         /* print to console if btn1 is held down */
         if (btn1 || btn2) {
-            System.out.println(work);
+            System.out.println(log);
         }
     }
     
