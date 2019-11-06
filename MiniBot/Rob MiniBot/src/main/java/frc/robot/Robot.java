@@ -26,11 +26,13 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.Faults;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends TimedRobot {
     /*
@@ -40,9 +42,6 @@ public class Robot extends TimedRobot {
     WPI_TalonSRX _leftFront = new WPI_TalonSRX(10);
     WPI_TalonSRX _rghtFront = new WPI_TalonSRX(20);
 
-
-    DifferentialDrive _diffDrive = new DifferentialDrive(_leftFront, _rghtFront);
-
     Joystick _joystick = new Joystick(0);
 
     Faults _faults_L = new Faults();
@@ -51,8 +50,10 @@ public class Robot extends TimedRobot {
     double pi = Math.PI;
     double leftPos, rghtPos;
     double  diam =  4.5;
-    double leftPct, rghtPct, maxVel=2 ;  // maxVel in ft/sec??
+    double leftFwd, rghtFwd;
+    double leftVelInPerSec, rghtVelInPerSec, maxVel = 400 ;  // maxVel in inches/sec
     boolean velMode;
+    int kTimeoutMs = 30;
    
     @Override
     public void robotInit() {
@@ -71,11 +72,18 @@ public class Robot extends TimedRobot {
         _rghtFront.setSensorPhase(false);
         _leftFront.setSensorPhase(false);
 
-        /*
-         * WPI drivetrain classes defaultly assume left and right are opposite. call
-         * this so we can apply + to both sides when moving forward. DO NOT CHANGE
-         */
-        _diffDrive.setRightSideInverted(false);
+        _leftFront.setNeutralMode(NeutralMode.Brake);
+        _rghtFront.setNeutralMode(NeutralMode.Brake);
+        
+        /**
+		 * Max out the peak output (for all modes).  
+		 * However you can limit the output of a given PID object with configClosedLoopPeakOutput().
+		 */
+		_leftFront.configPeakOutputForward(+1.0, kTimeoutMs);
+		_leftFront.configPeakOutputReverse(-1.0, kTimeoutMs);
+        _rghtFront.configPeakOutputForward(+1.0, kTimeoutMs);
+        _leftFront.configPeakOutputReverse(-1.0, kTimeoutMs);
+	
         
     }
 
@@ -104,8 +112,17 @@ public class Robot extends TimedRobot {
         /* get gamepad stick values          
          *  Make sure Gamepad Forward is positive for FORWARD
          */
-        leftPct = -1 * _joystick.getRawAxis(1); /* positive is forward */
-        rghtPct = -1 * _joystick.getRawAxis(5); /* positive is right */
+        leftFwd = -1 * _joystick.getRawAxis(1); /* positive is forward */
+        rghtFwd = -1 * _joystick.getRawAxis(5); /* positive is right */
+
+            /* deadband gamepad 10% */
+        if (Math.abs(leftFwd) < 0.10) {
+            leftFwd = 0;
+        }
+        
+        if (Math.abs(rghtFwd) < 0.10) {
+            rghtFwd = 0;
+        }
 
         boolean btn1 = _joystick.getRawButton(5); /* if button is down, print log values */
         boolean btn2 = _joystick.getRawButton(6); /* if button is down, print log values */
@@ -125,39 +142,39 @@ public class Robot extends TimedRobot {
         }
 
         /* drive robot */
-        if ( ! velMode) {
-             /* deadband gamepad 10% */
-             if (Math.abs(leftPct) < 0.10) {
-                leftPct = 0;
-            }
+        if ( ! velMode) {       //  Percent drive mode
+            
+            leftFwd = leftFwd * 0.45;  //  limit motor voltage so we don't break too much
+            rghtFwd = rghtFwd * 0.45;  //  limit motor voltage so we don't break too much
+           
+            _leftFront.set(ControlMode.PercentOutput, leftFwd);
+            _rghtFront.set(ControlMode.PercentOutput, rghtFwd);
         
-            if (Math.abs(rghtPct) < 0.10) {
-                rghtPct = 0;
-            }
-            leftPct = leftPct * 0.45;  //  limit motor voltage so we don't break too much
-            rghtPct = rghtPct * 0.45;  //  limit motor voltage so we don't break too much
-
-            _diffDrive.tankDrive(leftPct, rghtPct);
+        
         }   
         /* else drive with velocity PID */
-        else {          // TODO ADD PID LOOP
-             _diffDrive.tankDrive(0.2, 0.2);  
-            leftPct *= maxVel;
-            rghtPct *= maxVel;
+        else {          //  ADD PID LOOP
+
+            double targetL_IPS = leftFwd * maxVel;
+            double targetR_IPS = rghtFwd * maxVel;
+
+            double targetL_unitsPer100ms = targetL_IPS * 4096 / 10;
+            double targetR_unitsPer100ms = targetR_IPS * 4096 / 10;
+
+
+            System.out.println("targetL_unitsPer100ms " + targetL_unitsPer100ms);
+
+            _rghtFront.set(ControlMode.Velocity, targetR_unitsPer100ms);
+            _leftFront.set(ControlMode.Velocity, targetL_unitsPer100ms);       
+                  
         }  
        
-        log += " GL:" + leftPct + " GR:" + rghtPct;
-
-        /* get sensor values */
-        readPosition();
-        //leftPos = _leftFront.getSelectedSensorPosition();
-       // rghtPos = _rghtFront.getSelectedSensorPosition();
-        double leftVelUnitsPer100ms = _leftFront.getSelectedSensorVelocity(0);
-        double rghtVelUnitsPer100ms = _rghtFront.getSelectedSensorVelocity(0);
-
+        log += " GL:" + leftFwd + " GR:" + rghtFwd;
+        
+        readEncoders();     /* get sensor values */      
        
    
-        log += " LP:"+(int)leftPos+" LV:" + leftVelUnitsPer100ms + " RP:"+(int)rghtPos + " RV:" + rghtVelUnitsPer100ms;
+        log += " LP:"+(int)leftPos+" LV:" + leftVelInPerSec + " RP:"+(int)rghtPos + " RV:" + rghtVelInPerSec;
 
         /*
          * drive motor at least 25%, Talons will auto-detect if sensor is out of phase
@@ -181,25 +198,30 @@ public class Robot extends TimedRobot {
     @Override
     public void autonomousPeriodic() {   
           /* drive robot */
-        readPosition();
+        readEncoders();
         if ((leftPos+rghtPos)/2 < 48) {   // stop at 48 inches
-            leftPct = 0.4;
-            rghtPct = 0.4;
+            leftFwd = 0.4;
+            rghtFwd
+             = 0.4;
         }
         else {
-            leftPct = 0;
-            rghtPct = 0;
+            leftFwd = 0;
+            rghtFwd = 0;
         }
-        _diffDrive.tankDrive(leftPct, rghtPct);
-
+       
     }
 
-    public void readPosition() {
+    public void readEncoders() {
         leftPos = _leftFront.getSelectedSensorPosition();
         rghtPos = _rghtFront.getSelectedSensorPosition();
        
         leftPos = (leftPos/4096)*pi*diam;  // Calculate distance in inches
         rghtPos = (rghtPos/4096)*pi*diam;
 
+        double leftVelUnitsPer100ms = _leftFront.getSelectedSensorVelocity(0);
+        double rghtVelUnitsPer100ms = _rghtFront.getSelectedSensorVelocity(0);
+
+        rghtVelInPerSec = (rghtVelUnitsPer100ms/4096)*pi*diam * 10;
+        leftVelInPerSec = (leftVelUnitsPer100ms/4096)*pi*diam * 10;
     }
 }
