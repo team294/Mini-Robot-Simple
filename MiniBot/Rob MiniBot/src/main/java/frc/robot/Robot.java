@@ -51,9 +51,12 @@ public class Robot extends TimedRobot {
     double leftPos, rghtPos;
     double  diam =  4.5;
     double leftFwd, rghtFwd;
-    double leftVelInPerSec, rghtVelInPerSec, maxVel = 400 ;  // maxVel in inches/sec
+    double leftVelInPerSec, rghtVelInPerSec, maxVel = 40 ;  // maxVel in inches/sec
     boolean velMode;
+
     int kTimeoutMs = 30;
+    double kF= 0, /*1023/146,*/ kP = 0.1, kD=0, kI=0;
+    
    
     @Override
     public void robotInit() {
@@ -82,9 +85,20 @@ public class Robot extends TimedRobot {
 		_leftFront.configPeakOutputForward(+1.0, kTimeoutMs);
 		_leftFront.configPeakOutputReverse(-1.0, kTimeoutMs);
         _rghtFront.configPeakOutputForward(+1.0, kTimeoutMs);
-        _leftFront.configPeakOutputReverse(-1.0, kTimeoutMs);
-	
-        
+        _rghtFront.configPeakOutputReverse(-1.0, kTimeoutMs);
+
+		_leftFront.configPeakOutputForward(1, kTimeoutMs);
+		_leftFront.configPeakOutputReverse(-1, kTimeoutMs);
+
+        _leftFront.config_kF(0,kF,kTimeoutMs);
+        _leftFront.config_kP(0,kP,kTimeoutMs);
+        _leftFront.config_kD(0,kD,kTimeoutMs);
+        _leftFront.config_kI(0,kI,kTimeoutMs);
+
+        _rghtFront.config_kF(0,kF,kTimeoutMs);
+        _rghtFront.config_kP(0,kP,kTimeoutMs);
+        _rghtFront.config_kD(0,kD,kTimeoutMs);
+        _rghtFront.config_kI(0,kI,kTimeoutMs);
     }
 
     @Override
@@ -158,11 +172,11 @@ public class Robot extends TimedRobot {
             double targetL_IPS = leftFwd * maxVel;
             double targetR_IPS = rghtFwd * maxVel;
 
-            double targetL_unitsPer100ms = targetL_IPS * 4096 / 10;
-            double targetR_unitsPer100ms = targetR_IPS * 4096 / 10;
+            double targetL_unitsPer100ms = targetL_IPS * 4096 /( 10*pi*diam);
+            double targetR_unitsPer100ms = targetR_IPS * 4096 /( 10*pi*diam);
 
 
-            System.out.println("targetL_unitsPer100ms " + targetL_unitsPer100ms);
+            System.out.println("targetL " + targetL_unitsPer100ms + " targetR " + targetR_unitsPer100ms);
 
             _rghtFront.set(ControlMode.Velocity, targetR_unitsPer100ms);
             _leftFront.set(ControlMode.Velocity, targetL_unitsPer100ms);       
