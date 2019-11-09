@@ -51,11 +51,12 @@ public class Robot extends TimedRobot {
     double leftPos, rghtPos;
     double  diam =  4.5;
     double leftFwd, rghtFwd;
-    double leftVelInPerSec, rghtVelInPerSec, maxVel = 40 ;  // maxVel in inches/sec
+    double leftVelInPerSec, rghtVelInPerSec, maxVel = 150 ;  // maxVel in inches/sec
     boolean velMode;
 
     int kTimeoutMs = 30;
-    double kF= 0, /*1023/146,*/ kP = 0.1, kD=0, kI=0;
+    double kF= 1023/1460, kP = 0.1, kD=0, kI=0;
+    double maxPct = 0.45;
     
    
     @Override
@@ -158,16 +159,17 @@ public class Robot extends TimedRobot {
         /* drive robot */
         if ( ! velMode) {       //  Percent drive mode
             
-            leftFwd = leftFwd * 0.45;  //  limit motor voltage so we don't break too much
-            rghtFwd = rghtFwd * 0.45;  //  limit motor voltage so we don't break too much
-           
+            leftFwd = leftFwd * maxPct;  //  limit motor voltage so we don't break too much
+            rghtFwd = rghtFwd * maxPct;  //  limit motor voltage so we don't break too much            
+            
+            
             _leftFront.set(ControlMode.PercentOutput, leftFwd);
             _rghtFront.set(ControlMode.PercentOutput, rghtFwd);
         
         
         }   
         /* else drive with velocity PID */
-        else {          //  ADD PID LOOP
+        else {         
 
             double targetL_IPS = leftFwd * maxVel;
             double targetR_IPS = rghtFwd * maxVel;
@@ -182,14 +184,9 @@ public class Robot extends TimedRobot {
             _leftFront.set(ControlMode.Velocity, targetL_unitsPer100ms);       
                   
         }  
-       
-        log += " GL:" + leftFwd + " GR:" + rghtFwd;
-        
+
         readEncoders();     /* get sensor values */      
        
-   
-        log += " LP:"+(int)leftPos+" LV:" + leftVelInPerSec + " RP:"+(int)rghtPos + " RV:" + rghtVelInPerSec;
-
         /*
          * drive motor at least 25%, Talons will auto-detect if sensor is out of phase
          */
@@ -203,9 +200,14 @@ public class Robot extends TimedRobot {
             log += " R sensor is out of phase";
         }
 
+        
+        if (log.length() > 0) System.out.println(log);
+
+
         /* print to console if btn1 is held down */
         if (btn1 || btn2) {
-            System.out.println(log);
+            System.out.printf( "GL:%.2f  LP:%.2f  LVips:%.2f \n", leftFwd,leftPos,leftVelInPerSec);
+            System.out.printf( "RL:%.2f  RP:%.2f  RVips:%.2f \n", rghtFwd,rghtPos,rghtVelInPerSec);
         }
     }
     
@@ -215,13 +217,14 @@ public class Robot extends TimedRobot {
         readEncoders();
         if ((leftPos+rghtPos)/2 < 48) {   // stop at 48 inches
             leftFwd = 0.4;
-            rghtFwd
-             = 0.4;
+            rghtFwd = 0.4;
         }
         else {
             leftFwd = 0;
             rghtFwd = 0;
         }
+        _leftFront.set(ControlMode.PercentOutput, leftFwd);
+        _rghtFront.set(ControlMode.PercentOutput, rghtFwd);       
        
     }
 
